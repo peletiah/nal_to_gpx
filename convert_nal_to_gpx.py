@@ -3,7 +3,7 @@
 import decode_nal
 
 def main():
-    nal_file = open('../20131203_05_42_31.NAL')
+    nal_file = open('20131203_05_42_31.NAL')
     nal_bin_data=nal_file.read()
     
     block_number = decode_nal.num_blocks(nal_bin_data)
