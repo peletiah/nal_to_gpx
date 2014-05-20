@@ -15,10 +15,10 @@ def generate_trk(root_element,gps_data):
     trk_element = etree.Element("trk")
     root_element.append(trk_element)
     trkpt_num = len(gps_data)
-    distance = get_metadata.get_distance(gps_data)
-    print distance
+    distance = get_metadata.get_distance_vincenty(gps_data)
+    duration = get_metadata.get_duration(gps_data)
     etree.SubElement(trk_element, "name").text = "Track 001"
-    etree.SubElement(trk_element, "desc").text = "Total Track Points: {0}. Total time: 0h33m40s. Journey: {1:.3f}Km".format(trkpt_num, distance)
+    etree.SubElement(trk_element, "desc").text = "Total Track Points: {0}. Total time: {1}. Journey: {2:.3f}Km".format(trkpt_num, duration, distance)
     trkseg_element = etree.Element("trkseg")
     trk_element.append(trkseg_element)
     for trackpoint in gps_data: 
@@ -80,7 +80,6 @@ def generate_xml(gps_data):
     return root_element
 
 def write_gpx_file(xml_tree, nal_filename):
-    print nal_filename
     gpx_filename = os.path.splitext(nal_filename)[0]+'.gpx'
     file = codecs.open(gpx_filename, "w", "utf-8")
     file.write(etree.tostring(xml_tree, xml_declaration=True, pretty_print=True, encoding='utf-8'))

@@ -47,8 +47,7 @@ typedef struct nal_data32 {
 
 """
 
-#TODO speed has a value of zero throughout
-# the file - probably there's an error in the description above
+#TODO speed has a value of 0 if no bike-sensor is present (GPS-mode only)
 
 #Fixed blocksize of 32 Byte
 blocksize = 32
