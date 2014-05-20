@@ -2,26 +2,30 @@ from lxml import etree
 from xml.etree import ElementTree as ET
 import codecs
 import get_metadata
+import os
 
 def generate_metadata(root_element,gps_data):
     metadata_element = etree.Element("metadata")
     root_element.append(metadata_element)
-    bounds_element=etree.Element("bounds", maxlat = "38.448454", maxlon = "51.582333", minlat = "35.679248", minlon = "46.274586")
+    max_lat, min_lat, max_lon, min_lon = get_metadata.get_bounds(gps_data)
+    bounds_element=etree.Element("bounds", maxlat = str(max_lat), maxlon = str(max_lon), minlat = str(min_lat), minlon = str(min_lon))
     metadata_element.append(bounds_element)
 
 def generate_trk(root_element,gps_data):
     trk_element = etree.Element("trk")
     root_element.append(trk_element)
-    gps_meta_data = get_metadata.get_metadata(gps_data)
+    trkpt_num = len(gps_data)
+    distance = get_metadata.get_distance(gps_data)
+    print distance
     etree.SubElement(trk_element, "name").text = "Track 001"
-    etree.SubElement(trk_element, "desc").text = "Total Track Points: 203. Total time: 0h33m40s. Journey: 5.058Km"
+    etree.SubElement(trk_element, "desc").text = "Total Track Points: {0}. Total time: 0h33m40s. Journey: {1:.3f}Km".format(trkpt_num, distance)
     trkseg_element = etree.Element("trkseg")
     trk_element.append(trkseg_element)
     for trackpoint in gps_data: 
         generate_trkpt(trkseg_element, trackpoint)
 
 def generate_timestamp(trkpt_element, trackpoint):
-    timestamp = '{:04d}-{:02d}-{:02d}-T{:02d}:{:02d}:{:02d}Z'.format(\
+    timestamp = '{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}Z'.format(\
                  trackpoint['year'], \
                  trackpoint['month'], \
                  trackpoint['day'], \
@@ -32,10 +36,12 @@ def generate_timestamp(trkpt_element, trackpoint):
 
 
 def generate_trkpt_desc(trkpt_element, trackpoint):
-    trkpt_desc = 'Lat.={0}, Long.={0}, Alt.={0}m.'.format(\
+    trkpt_desc = 'Lat.={0}, Long.={1}, Alt.={2}m., Speed={3}Km/h, Course={4}deg.'.format(\
                  trackpoint['latitude'], \
                  trackpoint['longitude'], \
-                 trackpoint['height'])
+                 trackpoint['height'], \
+                 trackpoint['speed'], \
+                 trackpoint['compass'])
     etree.SubElement(trkpt_element, "desc").text = trkpt_desc
     
     
@@ -68,13 +74,15 @@ def generate_xml(gps_data):
     NS = 'http://www.w3.org/2001/XMLSchema-instance'
     location_attribute = '{%s}schemaLocation' % NS
     location_value = "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.topografix.com/GPX/gpx_overlay/0/3 http://www.topografix.com/GPX/gpx_overlay/0/3/gpx_overlay.xsd http://www.topografix.com/GPX/gpx_modified/0/1 http://www.topografix.com/GPX/gpx_modified/0/1/gpx_modified.xsd"
-    root_element = etree.Element("gpx", version="1.0" creator="nal_to_gpx.py - Christian Benke", attrib={location_attribute: location_value}, xmlns = "http://www.topografix.com/GPX/1/1")
+    root_element = etree.Element("gpx", version="1.0", creator="nal_to_gpx.py - Christian Benke", attrib={location_attribute: location_value}, xmlns = "http://www.topografix.com/GPX/1/1")
     generate_metadata(root_element,gps_data)
     generate_trk(root_element,gps_data)
     return root_element
 
-def write_gpx_file(xml_tree):
-    file = codecs.open('test.gpx', "w", "utf-8")
+def write_gpx_file(xml_tree, nal_filename):
+    print nal_filename
+    gpx_filename = os.path.splitext(nal_filename)[0]+'.gpx'
+    file = codecs.open(gpx_filename, "w", "utf-8")
     file.write(etree.tostring(xml_tree, xml_declaration=True, pretty_print=True, encoding='utf-8'))
     file.close()    
     

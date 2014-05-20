@@ -10,39 +10,51 @@ from decimal import Decimal
 
 NAL format definition via http://www.mikrocontroller.net/topic/260568
 
-#pragma pack(1)
-struct data32
-{
-unsigned char pointtype;    // 0 - normal , 1 - start , 2 - marked
-unsigned char padding1;
 
-unsigned int second:6,minute:6,hour:5;
-unsigned int day:5,month:4,year:6;        // add 2000 to year
+typedef struct nal_data32 {
+  unsigned char point_type; /* 0 - normal, 1 - start, 2 - marked */
 
-signed int latitude,longitude;       // divide by 1E7 for degree
-signed short height;        // m
-signed char temperature;    // °C
-unsigned short pressure;    // hPa
-unsigned char cadence;      // RPM
-unsigned char pulse;        // BPM
-signed char slope;          // degree
+  unsigned char padding_1;
 
-signed short compass;       // degree
-signed short roll;          // degree
-signed short yaw;           // degree
+  unsigned int second: 6, minute: 6, hour: 5;
+  unsigned int day: 5, month: 4, year: 6; /* add 2000 to year */
 
-unsigned char bikespeed;    // km/h
-unsigned char padding2[3];
+  signed int latitude;    /* divide by 1E7 for degrees */
+  signed int longitude;   /* divide by 1E7 for degrees */
+
+  unsigned short height;    /* meters */
+
+  signed char temperature;  /* °C */
+
+  unsigned short pressure;  /* mbar */
+
+  unsigned char cadence;    /* RPM */
+  unsigned char pulse;    /* BPM */
+
+  signed char slope;    /* degrees */
+
+  signed short compass;   /* °Z axis */
+  signed short roll;    /* °X axis */
+  signed short yaw;   /* °Y axis */
+
+  unsigned char speed;    /* km/h */
+
+  unsigned char bike;   /* ID# 0-3 */
+
+  unsigned char padding_2;
+  unsigned char padding_3;
 }
 
 """
 
+#TODO speed has a value of zero throughout
+# the file - probably there's an error in the description above
 
 #Fixed blocksize of 32 Byte
 blocksize = 32
 
 #Format declaration in short form
-format = '<BBIiiHbHBBbhhhBBBB' 
+format = '<BBIiihbHBBbhhhBBBB' 
 
 #Offset-declaration for the 32bit time-field
 width_offsets = [(6,0),(6,6),(5,12),(5,17),(4,22),(6,26)] 

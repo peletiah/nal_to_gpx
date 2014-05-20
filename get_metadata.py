@@ -40,7 +40,6 @@ def get_distance(gps_data):
         n = n+1
         #if last_trkpt['timestamp'] != trkpt['timestamp']:
         distance = distance + haversine(last_trkpt['latitude'],last_trkpt['longitude'],trkpt['latitude'],trkpt['longitude'])
-        print '#',n,distance
         last_trkpt=trkpt
     return distance
          
